@@ -688,3 +688,173 @@ button{
     }
 
 }
+/* =======================
+   ПОДДЕРЖКА
+======================= */
+
+.support-fab {
+    position: fixed;
+    right: 25px;
+    bottom: 110px;
+
+    width: 65px;
+    height: 65px;
+
+    border: none;
+    border-radius: 50%;
+
+    font-size: 28px;
+
+    cursor: pointer;
+
+    backdrop-filter: blur(20px);
+
+    background: rgba(255,255,255,0.12);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+
+    transition: .25s;
+
+    z-index: 999;
+}
+
+.support-fab:hover {
+    transform: scale(1.08);
+}
+
+.support-badge {
+
+    position: absolute;
+
+    top: 6px;
+    right: 6px;
+
+    width: 18px;
+    height: 18px;
+
+    border-radius: 50%;
+
+    background: #ff3b30;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
+    font-size: 10px;
+
+    animation: pulseSupport 1.3s infinite;
+}
+
+@keyframes pulseSupport {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.25);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+}
+
+.support-list {
+
+    padding: 15px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.support-user {
+
+    background: rgba(255,255,255,.08);
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    cursor: pointer;
+
+    transition: .25s;
+
+    backdrop-filter: blur(15px);
+}
+
+.support-user:hover {
+
+    transform: translateY(-2px);
+
+    background: rgba(255,255,255,.12);
+}
+
+.support-user-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.support-user-name {
+
+    font-size: 17px;
+
+    font-weight: 600;
+}
+
+.support-user-badge {
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: #ff3b30;
+}
+
+.support-empty {
+
+    text-align: center;
+
+    opacity: .7;
+
+    margin-top: 80px;
+
+    font-size: 18px;
+}
+
+/* анимация открытия */
+
+#supportPage,
+#supportListPage,
+#adminSupportPage {
+
+    animation: supportOpen .25s ease;
+}
+
+@keyframes supportOpen {
+
+    from {
+
+        opacity: 0;
+
+        transform: scale(.98);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: scale(1);
+    }
+}

@@ -8,6 +8,8 @@ const { Server } = require("socket.io");
 
 const User = require("./models/User");
 const Message = require("./models/Message");
+const SupportConversation = require("./models/SupportConversation");
+const SupportMessage = require("./models/SupportMessage");
 
 const app = express();
 
@@ -37,6 +39,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 let waitingUsers = [];
 const activeRooms = {};
+const ADMIN_USERNAME = "@ChatAdmin";
 
 // ======================
 // SOCKET
@@ -45,6 +48,8 @@ const activeRooms = {};
 io.on("connection", (socket) => {
 
     console.log("Connected:", socket.id);
+    
+    socket.isAdmin = false;
 
     // ======================
     // LOGIN
@@ -66,6 +71,9 @@ io.on("connection", (socket) => {
             await user.save();
 
             socket.username = username;
+            if (username === ADMIN_USERNAME) {
+    socket.isAdmin = true;
+}
 
             // 👉 ВСЕ сообщения остаются навсегда
             const messages = await Message.find({
@@ -187,6 +195,326 @@ io.on("connection", (socket) => {
         }
 
     });
+    socket.on("openSupport", async () => {
+
+    try {
+
+        let conversation =
+            await SupportConversation.findOne({
+                user: socket.username
+            });
+
+        if (!conversation) {
+
+            conversation =
+                await SupportConversation.create({
+                    user: socket.username
+                });
+
+        }
+
+        const messages =
+            await SupportMessage.find({
+                conversationId:
+                    conversation._id
+            });
+
+        socket.emit(
+            "supportHistory",
+            messages
+        );
+
+    } catch (err) {
+        console.error(err);
+    }
+
+});
+socket.on(
+    "supportMessage",
+    async (text) => {
+
+        try {
+
+            let conversation =
+                await SupportConversation.findOne({
+                    user: socket.username
+                });
+
+            if (!conversation) {
+
+                conversation =
+                    await SupportConversation.create({
+                        user: socket.username
+                    });
+
+            }
+
+            const message =
+                await SupportMessage.create({
+
+                    conversationId:
+                        conversation._id,
+
+                    sender:
+                        socket.username,
+
+                    text
+
+                });
+
+            conversation.unreadForAdmin += 1;
+
+            await conversation.save();
+
+            const admin =
+    await User.findOne({
+        username:
+            ADMIN_USERNAME
+    });
+
+if (
+    admin &&
+    admin.online &&
+    admin.socketId
+) {
+
+    io.to(
+        admin.socketId
+    ).emit(
+        "newSupportMessage",
+        {
+            sender:
+                socket.username,
+
+            text
+        }
+    );
+
+}
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+socket.on("getSupportList", async () => {
+
+    try {
+
+        if (!socket.isAdmin) return;
+
+        const conversations =
+            await SupportConversation.find({
+                active: true
+            })
+            .sort({
+                updatedAt: -1
+            });
+
+        socket.emit(
+            "supportList",
+            conversations
+        );
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+});
+socket.on(
+    "openSupportConversation",
+    async (user) => {
+
+        try {
+
+            if (!socket.isAdmin) return;
+
+            const conversation =
+                await SupportConversation.findOne({
+                    user
+                });
+
+            if (!conversation) return;
+
+            const messages =
+                await SupportMessage.find({
+                    conversationId:
+                        conversation._id
+                });
+
+            conversation.unreadForAdmin = 0;
+
+            await conversation.save();
+
+            socket.emit(
+                "supportConversation",
+                {
+                    user,
+                    messages
+                }
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
+// ======================
+// ОТВЕТ АДМИНА
+// ======================
+
+socket.on(
+    "adminSupportMessage",
+    async (data) => {
+
+        try {
+
+            if (!socket.isAdmin)
+                return;
+
+            const conversation =
+                await SupportConversation.findOne({
+                    user: data.user
+                });
+
+            if (!conversation)
+                return;
+
+            const message =
+                await SupportMessage.create({
+
+                    conversationId:
+                        conversation._id,
+
+                    sender:
+                        ADMIN_USERNAME,
+
+                    text:
+                        data.text
+
+                });
+
+            conversation.unreadForUser += 1;
+
+            await conversation.save();
+
+            const target =
+                await User.findOne({
+                    username:
+                        data.user
+                });
+
+            if (
+                target &&
+                target.online &&
+                target.socketId
+            ) {
+
+                io.to(
+                    target.socketId
+                ).emit(
+                    "newSupportMessage",
+                    {
+                        sender:
+                            ADMIN_USERNAME,
+
+                        text:
+                            data.text
+                    }
+                );
+
+            }
+
+            socket.emit(
+                "adminMessageSent",
+                {
+                    text:
+                        data.text
+                }
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
+// ======================
+// ЗАВЕРШИТЬ ОБРАЩЕНИЕ
+// ======================
+
+socket.on(
+    "endSupportConversation",
+    async (user) => {
+
+        try {
+
+            if (!socket.isAdmin)
+                return;
+
+            const conversation =
+                await SupportConversation.findOne({
+                    user
+                });
+
+            if (!conversation)
+                return;
+
+            await SupportMessage.deleteMany({
+                conversationId:
+                    conversation._id
+            });
+
+            await SupportConversation.deleteOne({
+                _id:
+                    conversation._id
+            });
+
+            const target =
+                await User.findOne({
+                    username:
+                        user
+                });
+
+            if (
+                target &&
+                target.online
+            ) {
+
+                io.to(
+                    target.socketId
+                ).emit(
+                    "supportEnded"
+                );
+
+            }
+
+            socket.emit(
+                "supportEndedAdmin",
+                user
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
 
     // ======================
     // DISCONNECT

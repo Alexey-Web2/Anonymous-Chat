@@ -27,6 +27,64 @@ const chatMessages = document.getElementById("chatMessages");
 
 const messagesContainer = document.getElementById("messagesContainer");
 const toast = document.getElementById("errorToast");
+// ======================
+// ПОДДЕРЖКА
+// ======================
+
+const supportPage =
+    document.getElementById(
+        "supportPage"
+    );
+
+const supportMessages =
+    document.getElementById(
+        "supportMessages"
+    );
+
+const supportInput =
+    document.getElementById(
+        "supportInput"
+    );
+
+const supportBadge =
+    document.getElementById(
+        "supportBadge"
+    );
+
+const supportListPage =
+    document.getElementById(
+        "supportListPage"
+    );
+
+const supportList =
+    document.getElementById(
+        "supportList"
+    );
+
+const adminSupportPage =
+    document.getElementById(
+        "adminSupportPage"
+    );
+
+const adminSupportMessages =
+    document.getElementById(
+        "adminSupportMessages"
+    );
+
+const adminSupportInput =
+    document.getElementById(
+        "adminSupportInput"
+    );
+
+const adminSupportUser =
+    document.getElementById(
+        "adminSupportUser"
+    );
+
+const adminCloseModal =
+    document.getElementById(
+        "adminCloseModal"
+    );
 
 // ======================
 // ДАННЫЕ
@@ -34,6 +92,12 @@ const toast = document.getElementById("errorToast");
 
 let currentUser = null;
 let loggedIn = false;
+let supportOpened = false;
+
+let currentSupportUser = null;
+
+const ADMIN_USERNAME =
+    "@ChatAdmin";
 
 // ======================
 // LOGIN
@@ -388,6 +452,486 @@ function showToast(text) {
 }
 
 // ======================
+// ОТКРЫТЬ ПОДДЕРЖКУ
+// ======================
+
+function openSupport() {
+
+    if (
+        currentUser ===
+        ADMIN_USERNAME
+    ) {
+
+        socket.emit(
+            "getSupportList"
+        );
+
+        homePage.classList.add(
+            "hidden"
+        );
+
+        supportListPage.classList.remove(
+            "hidden"
+        );
+
+        return;
+    }
+
+    supportBadge.classList.add(
+        "hidden"
+    );
+
+    socket.emit(
+        "openSupport"
+    );
+
+    homePage.classList.add(
+        "hidden"
+    );
+
+    supportPage.classList.remove(
+        "hidden"
+    );
+
+}
+function closeSupport() {
+
+    supportPage.classList.add(
+        "hidden"
+    );
+
+    homePage.classList.remove(
+        "hidden"
+    );
+
+}
+function closeSupportList() {
+
+    supportListPage.classList.add(
+        "hidden"
+    );
+
+    homePage.classList.remove(
+        "hidden"
+    );
+
+}
+
+function openAdminCloseModal() {
+
+    adminCloseModal.classList.remove(
+        "hidden"
+    );
+
+}
+
+function closeAdminCloseModal() {
+
+    adminCloseModal.classList.add(
+        "hidden"
+    );
+
+}
+
+function leaveAdminChat() {
+
+    adminCloseModal.classList.add(
+        "hidden"
+    );
+
+    adminSupportPage.classList.add(
+        "hidden"
+    );
+
+    supportListPage.classList.remove(
+        "hidden"
+    );
+
+}
+
+function endSupportConversation() {
+
+    if (!currentSupportUser)
+        return;
+
+    socket.emit(
+        "endSupportConversation",
+        currentSupportUser
+    );
+
+}
+
+// ======================
+// ПОДДЕРЖКА SOCKET.IO
+// ======================
+
+function sendSupportMessage() {
+
+    const text =
+        supportInput.value.trim();
+
+    if (!text)
+        return;
+
+    socket.emit(
+        "supportMessage",
+        text
+    );
+
+    addSupportMyMessage(
+        text
+    );
+
+    supportInput.value = "";
+
+}
+
+function addSupportMyMessage(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.className =
+        "message my-message";
+
+    div.textContent =
+        text;
+
+    supportMessages.appendChild(
+        div
+    );
+
+    supportMessages.scrollTop =
+        supportMessages.scrollHeight;
+
+}
+
+function addSupportPartnerMessage(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.className =
+        "message";
+
+    div.textContent =
+        text;
+
+    supportMessages.appendChild(
+        div
+    );
+
+    supportMessages.scrollTop =
+        supportMessages.scrollHeight;
+
+}
+
+// ======================
+// ИСТОРИЯ ПОДДЕРЖКИ
+// ======================
+
+socket.on(
+    "supportHistory",
+    (messages) => {
+
+        supportMessages.innerHTML =
+            "";
+
+        messages.forEach(
+            msg => {
+
+                if (
+                    msg.sender ===
+                    currentUser
+                ) {
+
+                    addSupportMyMessage(
+                        msg.text
+                    );
+
+                } else {
+
+                    addSupportPartnerMessage(
+                        msg.text
+                    );
+
+                }
+
+            }
+        );
+
+    }
+);
+
+// ======================
+// СПИСОК ОБРАЩЕНИЙ
+// ======================
+
+socket.on(
+    "supportList",
+    (conversations) => {
+
+        supportList.innerHTML =
+            "";
+
+        if (
+            conversations.length === 0
+        ) {
+
+            supportList.innerHTML = `
+                <div class="support-empty">
+                    Пока нет обращений
+                </div>
+            `;
+
+            return;
+        }
+
+        conversations.forEach(
+            conversation => {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+                item.className =
+                    "support-user";
+
+                item.innerHTML = `
+                    <div class="support-user-top">
+
+                        <div class="support-user-name">
+                            ${conversation.user}
+                        </div>
+
+                        ${
+                            conversation.unreadForAdmin > 0
+                            ? '<div class="support-user-badge"></div>'
+                            : ''
+                        }
+
+                    </div>
+                `;
+
+                item.onclick =
+                    () => {
+
+                        currentSupportUser =
+                            conversation.user;
+
+                        socket.emit(
+                            "openSupportConversation",
+                            conversation.user
+                        );
+
+                    };
+
+                supportList.appendChild(
+                    item
+                );
+
+            }
+        );
+
+    }
+);
+
+// ======================
+// ОТКРЫТЬ ДИАЛОГ
+// ======================
+
+socket.on(
+    "supportConversation",
+    (data) => {
+
+        adminSupportMessages.innerHTML =
+            "";
+
+        adminSupportUser.textContent =
+            data.user;
+
+        data.messages.forEach(
+            msg => {
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+                div.className =
+                    msg.sender === currentSupportUser
+                    ? "message"
+                    : "message my-message";
+
+                div.textContent =
+                    msg.text;
+
+                adminSupportMessages.appendChild(
+                    div
+                );
+
+            }
+        );
+
+        supportListPage.classList.add(
+            "hidden"
+        );
+
+        adminSupportPage.classList.remove(
+            "hidden"
+        );
+
+    }
+);
+
+// ======================
+// НОВОЕ СООБЩЕНИЕ
+// ======================
+
+socket.on(
+    "newSupportMessage",
+    (data) => {
+
+        if (
+            currentUser ===
+            ADMIN_USERNAME
+        ) {
+
+            socket.emit(
+                "getSupportList"
+            );
+
+            return;
+        }
+
+        supportBadge.classList.remove(
+            "hidden"
+        );
+
+        if (
+            !supportPage.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            addSupportPartnerMessage(
+                data.text
+            );
+
+        }
+
+    }
+);
+
+socket.on(
+    "adminMessageSent",
+    () => {
+
+        socket.emit(
+            "getSupportList"
+        );
+
+    }
+);
+
+socket.on(
+    "supportEndedAdmin",
+    () => {
+
+        adminCloseModal.classList.add(
+            "hidden"
+        );
+
+        adminSupportPage.classList.add(
+            "hidden"
+        );
+
+        supportListPage.classList.remove(
+            "hidden"
+        );
+
+        socket.emit(
+            "getSupportList"
+        );
+
+        showToast(
+            "Обращение завершено"
+        );
+
+    }
+);
+
+socket.on(
+    "supportEnded",
+    () => {
+
+        supportMessages.innerHTML =
+            "";
+
+        supportPage.classList.add(
+            "hidden"
+        );
+
+        homePage.classList.remove(
+            "hidden"
+        );
+
+        showToast(
+            "Чат поддержки завершён"
+        );
+
+    }
+);
+
+
+
+function sendAdminSupportMessage() {
+
+    const text =
+        adminSupportInput.value.trim();
+
+    if (!text)
+        return;
+
+    socket.emit(
+        "adminSupportMessage",
+        {
+            user:
+                currentSupportUser,
+
+            text
+        }
+    );
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.className =
+        "message my-message";
+
+    div.textContent =
+        text;
+
+    adminSupportMessages.appendChild(
+        div
+    );
+
+    adminSupportMessages.scrollTop =
+        adminSupportMessages.scrollHeight;
+
+    adminSupportInput.value = "";
+
+}
+
+
+// ======================
 // ENTER ОБРАБОТКА
 // ======================
 
@@ -407,3 +951,35 @@ usernameInput.addEventListener("keydown", (e) => {
     }
 
 });
+supportInput?.addEventListener(
+    "keydown",
+    (e) => {
+
+        if (
+            e.key === "Enter"
+        ) {
+
+            e.preventDefault();
+
+            sendSupportMessage();
+
+        }
+
+    }
+);
+adminSupportInput?.addEventListener(
+    "keydown",
+    (e) => {
+
+        if (
+            e.key === "Enter"
+        ) {
+
+            e.preventDefault();
+
+            sendAdminSupportMessage();
+
+        }
+
+    }
+);

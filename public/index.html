@@ -99,6 +99,21 @@
         >
             +
         </button>
+        
+        <!-- Кнопка поддержки -->
+<button
+    id="supportButton"
+    class="support-fab"
+    onclick="openSupport()"
+>
+    🛟
+    <span
+        id="supportBadge"
+        class="support-badge hidden"
+    >
+        ●
+    </span>
+</button>
 
     </section>
 
@@ -332,6 +347,188 @@
 
     <!-- Socket.IO -->
     <script src="/socket.io/socket.io.js"></script>
+    <!-- ЧАТ ПОДДЕРЖКИ -->
+<section
+    id="supportPage"
+    class="chat-page hidden"
+>
+
+    <header class="chat-header">
+
+        <div class="chat-user">
+
+            <div class="chat-avatar">
+                🛟
+            </div>
+
+            <div>
+
+                <div class="chat-title">
+                    Поддержка
+                </div>
+
+                <div class="chat-status">
+                    Онлайн
+                </div>
+
+            </div>
+
+        </div>
+
+        <button
+            class="close-chat"
+            onclick="closeSupport()"
+        >
+            ✕
+        </button>
+
+    </header>
+
+    <div
+        id="supportMessages"
+        class="chat-messages"
+    ></div>
+
+    <div class="chat-input-container">
+
+        <input
+            id="supportInput"
+            type="text"
+            placeholder="Напишите сообщение..."
+        >
+
+        <button
+            class="send-button"
+            onclick="sendSupportMessage()"
+        >
+            ➤
+        </button>
+
+    </div>
+
+</section>
+<!-- СПИСОК ОБРАЩЕНИЙ -->
+<section
+    id="supportListPage"
+    class="page hidden"
+>
+
+    <header class="chat-header">
+
+        <div class="chat-title">
+            Запросы поддержки
+        </div>
+
+        <button
+            class="close-chat"
+            onclick="closeSupportList()"
+        >
+            ✕
+        </button>
+
+    </header>
+
+    <div
+        id="supportList"
+        class="support-list"
+    ></div>
+
+</section>
+<!-- ДИАЛОГ АДМИНА -->
+<section
+    id="adminSupportPage"
+    class="chat-page hidden"
+>
+
+    <header class="chat-header">
+
+        <div class="chat-user">
+
+            <div class="chat-avatar">
+                👤
+            </div>
+
+            <div>
+
+                <div
+                    id="adminSupportUser"
+                    class="chat-title"
+                >
+                    @username
+                </div>
+
+            </div>
+
+        </div>
+
+        <button
+            class="close-chat"
+            onclick="openAdminCloseModal()"
+        >
+            ✕
+        </button>
+
+    </header>
+
+    <div
+        id="adminSupportMessages"
+        class="chat-messages"
+    ></div>
+
+    <div class="chat-input-container">
+
+        <input
+            id="adminSupportInput"
+            type="text"
+            placeholder="Ответ..."
+        >
+
+        <button
+            class="send-button"
+            onclick="sendAdminSupportMessage()"
+        >
+            ➤
+        </button>
+
+    </div>
+
+</section>
+<!-- ВЫХОД ИЗ ДИАЛОГА -->
+<div
+    id="adminCloseModal"
+    class="modal hidden"
+>
+
+    <div class="modal-window">
+
+        <h2>
+            Завершение диалога
+        </h2>
+
+        <button
+            class="action-btn"
+            onclick="closeAdminCloseModal()"
+        >
+            Вернуться в чат
+        </button>
+
+        <button
+            class="action-btn"
+            onclick="leaveAdminChat()"
+        >
+            Выйти из чата
+        </button>
+
+        <button
+            class="danger-btn"
+            onclick="endSupportConversation()"
+        >
+            Завершить чат
+        </button>
+
+    </div>
+
+</div>
 
     <!-- Основной JS -->
     <script src="app.js"></script>
