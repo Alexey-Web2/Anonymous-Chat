@@ -130,11 +130,11 @@
             </h2>
 
             <button
-                class="action-btn"
-                onclick="startSearch()"
-            >
-                Найти собеседника
-            </button>
+    class="action-btn"
+    onclick="openRoomSelector()"
+>
+    Найти собеседника
+</button>
 
             <button
                 class="action-btn"
@@ -144,8 +144,44 @@
             </button>
 
         </div>
+        <!-- ВЫБОР КОЛИЧЕСТВА УЧАСТНИКОВ -->
 
     </div>
+    
+    <div
+    id="roomSelectorModal"
+    class="modal hidden"
+>
+
+    <div class="modal-window">
+
+        <h2>
+            Выберите количество участников
+        </h2>
+
+        <button
+            class="action-btn"
+            onclick="startSearch(2)"
+        >
+            2 человека
+        </button>
+
+        <button
+            class="action-btn"
+            onclick="startSearch(3)"
+        >
+            3 человека
+        </button>
+
+        <button
+            class="action-btn"
+            onclick="startSearch(4)"
+        >
+            4 человека
+        </button>
+
+    </div>
+  </div>
 
     <!-- Поиск собеседника -->
     <div
@@ -161,9 +197,9 @@
                 Поиск собеседника...
             </h2>
 
-            <p>
-                Ожидаем подключения пользователя
-            </p>
+            <p id="searchCount">
+    Найдено: 1/2
+</p>
 
             <button
                 class="cancel-btn"

@@ -92,33 +92,93 @@ io.on("connection", (socket) => {
     // ПОИСК СОБЕСЕДНИКА
     // ======================
 
-    socket.on("findPartner", () => {
+    socket.on("findPartner", (roomSize) => {
 
-        if (waitingUsers.includes(socket)) return;
+    if (
+        waitingUsers.find(
+            u => u.id === socket.id
+        )
+    ) {
+        return;
+    }
 
-        waitingUsers.push(socket);
+    waitingUsers.push({
+        socket,
+        roomSize
+    });
 
-        if (waitingUsers.length >= 2) {
+    const group =
+        waitingUsers.filter(
+            u =>
+                u.roomSize === roomSize
+        );
 
-            const user1 = waitingUsers.shift();
-            const user2 = waitingUsers.shift();
+    // обновляем счётчик найденных
+    group.forEach(user => {
 
-            const room = "room_" + Date.now();
-
-            user1.join(room);
-            user2.join(room);
-
-            user1.room = room;
-            user2.room = room;
-
-            activeRooms[room] = {
-                users: [user1.id, user2.id]
-            };
-
-            io.to(room).emit("chatStarted");
-        }
+        user.socket.emit(
+            "searchCount",
+            {
+                found: group.length,
+                total: roomSize
+            }
+        );
 
     });
+
+    // ждём пока комната полностью соберётся
+    if (
+        group.length < roomSize
+    ) {
+        return;
+    }
+
+    const roomUsers =
+        waitingUsers
+            .filter(
+                u =>
+                    u.roomSize === roomSize
+            )
+            .slice(0, roomSize);
+
+    waitingUsers =
+        waitingUsers.filter(
+            u =>
+                !roomUsers.includes(u)
+        );
+
+    const room =
+        "room_" + Date.now();
+
+    activeRooms[room] = {
+        users: []
+    };
+
+    roomUsers.forEach((user, index) => {
+
+    user.socket.join(room);
+
+    user.socket.room = room;
+
+    user.socket.participantIndex =
+        index + 1;
+
+    activeRooms[room]
+        .users
+        .push(
+            user.socket.id
+        );
+
+});
+
+    io.to(room).emit(
+        "chatStarted",
+        {
+            roomSize
+        }
+    );
+
+});
 
     // ======================
     // СООБЩЕНИЯ В ЧАТЕ
@@ -126,15 +186,21 @@ io.on("connection", (socket) => {
 
     socket.on("chatMessage", (text) => {
 
-        if (!socket.room) return;
+    if (!socket.room) return;
 
-        // 🔥 ВАЖНО: отправляем ВСЕМ КРОМЕ ОТПРАВИТЕЛЯ
-        socket.to(socket.room).emit("chatMessage", {
-            sender: socket.username,
-            text
-        });
+    socket.to(socket.room).emit(
+        "chatMessage",
+        {
+            text,
+            participant:
+                socket.participantIndex
+        }
+    );
 
-    });
+});
+
+
+
 
     // ======================
     // ВЫХОД ИЗ ЧАТА
@@ -142,16 +208,17 @@ io.on("connection", (socket) => {
 
     socket.on("leaveChat", () => {
 
-        if (!socket.room) return;
+    if (!socket.room) return;
 
-        const room = socket.room;
+    const room = socket.room;
 
-        io.to(room).emit("chatClosed");
+    io.to(room).emit(
+        "chatClosed"
+    );
 
-        delete activeRooms[room];
+    delete activeRooms[room];
 
-        socket.room = null;
-    });
+});
 
     // ======================
     // ЛИЧНЫЕ СООБЩЕНИЯ

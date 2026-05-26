@@ -14,6 +14,10 @@ const chatPage = document.getElementById("chatPage");
 
 const actionsModal = document.getElementById("actionsModal");
 const searchModal = document.getElementById("searchModal");
+const roomSelectorModal =
+    document.getElementById(
+        "roomSelectorModal"
+    );
 const messageModal = document.getElementById("messageModal");
 const profileModal = document.getElementById("profileModal");
 const closeChatModal = document.getElementById("closeChatModal");
@@ -91,6 +95,7 @@ const adminCloseModal =
 // ======================
 
 let currentUser = null;
+let roomSize = 2;
 let loggedIn = false;
 let supportOpened = false;
 
@@ -141,38 +146,71 @@ function login() {
 
 window.addEventListener("load", () => {
 
-    const saved = localStorage.getItem("username");
+    const saved =
+        localStorage.getItem(
+            "username"
+        );
 
     if (saved) {
 
         currentUser = saved;
         loggedIn = true;
 
-        profileUsername.textContent = saved;
+        profileUsername.textContent =
+            saved;
 
-        avatar.textContent = saved
-            .replace("@", "")
-            .charAt(0)
-            .toUpperCase();
+        avatar.textContent =
+            saved
+                .replace("@", "")
+                .charAt(0)
+                .toUpperCase();
 
-        loginPage.classList.add("hidden");
-        homePage.classList.remove("hidden");
+        loginPage.classList.add(
+            "hidden"
+        );
 
-        socket.emit("login", currentUser);
+        homePage.classList.remove(
+            "hidden"
+        );
+
+        socket.emit(
+            "login",
+            currentUser
+        );
+
     }
+
 });
 
 // ======================
 // ПОИСК СОБЕСЕДНИКА
 // ======================
 
-function startSearch() {
+function startSearch(size) {
 
-    closeActions();
+    roomSize = size;
 
-    searchModal.classList.remove("hidden");
+    roomSelectorModal.classList.add(
+        "hidden"
+    );
 
-    socket.emit("findPartner");
+    searchModal.classList.remove(
+        "hidden"
+    );
+
+    const searchCount =
+        document.getElementById(
+            "searchCount"
+        );
+
+    searchCount.textContent =
+        `Найдено: 1/${size}`;
+
+    socket.emit(
+        "findPartner",
+        size
+    );
+
 }
 
 function cancelSearch() {
@@ -181,6 +219,25 @@ function cancelSearch() {
 
     socket.emit("leaveChat");
 }
+
+socket.on(
+    "searchCount",
+    (data) => {
+
+        const searchCount =
+            document.getElementById(
+                "searchCount"
+            );
+
+        if (searchCount) {
+
+            searchCount.textContent =
+                `Найдено: ${data.found}/${data.total}`;
+
+        }
+
+    }
+);
 
 // ======================
 // ЧАТ НАЧАЛСЯ
@@ -225,11 +282,17 @@ function sendMessage() {
 }
 
 // пришло сообщение
-socket.on("chatMessage", (data) => {
+socket.on(
+    "chatMessage",
+    (data) => {
 
-    addPartnerMessage(data.text);
+        addPartnerMessage(
+            data.text,
+            data.participant
+        );
 
-});
+    }
+);
 
 // чат закрыт
 socket.on("chatClosed", () => {
@@ -256,16 +319,50 @@ function addMyMessage(text) {
     scrollChat();
 }
 
-function addPartnerMessage(text) {
+function addPartnerMessage(
+    text,
+    participant = 1
+) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
 
-    div.className = "message";
-    div.textContent = text;
+    div.className =
+        "message";
+
+    // Цвет пузыря сообщения
+    if (participant === 2) {
+
+        div.style.background =
+            "#8B5CF6"; // фиолетовый
+
+    }
+
+    if (participant === 3) {
+
+        div.style.background =
+            "#FACC15"; // жёлтый
+
+    }
+
+    if (participant === 4) {
+
+        div.style.background =
+            "#22C55E"; // зелёный
+
+    }
+
+    // Белый текст у всех
+    div.style.color =
+        "#FFFFFF";
+
+    div.textContent =
+        text;
 
     chatMessages.appendChild(div);
 
     scrollChat();
+
 }
 
 function addSystemMessage(text) {
@@ -398,6 +495,15 @@ function logout() {
 
 function openActions() {
     actionsModal.classList.remove("hidden");
+}
+function openRoomSelector() {
+
+    closeActions();
+
+    roomSelectorModal.classList.remove(
+        "hidden"
+    );
+
 }
 
 function closeActions() {
@@ -867,6 +973,19 @@ socket.on(
 );
 
 socket.on(
+    "chatStarted",
+    () => {
+
+        searchModal.classList.add(
+            "hidden"
+        );
+
+        openChat();
+
+    }
+);
+
+socket.on(
     "supportEnded",
     () => {
 
@@ -929,6 +1048,37 @@ function sendAdminSupportMessage() {
     adminSupportInput.value = "";
 
 }
+
+window.addEventListener(
+    "click",
+    (e) => {
+
+        if (e.target === actionsModal) {
+            closeActions();
+        }
+
+        if (e.target === roomSelectorModal) {
+            roomSelectorModal.classList.add(
+                "hidden"
+            );
+        }
+
+        if (e.target === profileModal) {
+            profileModal.classList.add(
+                "hidden"
+            );
+        }
+
+        if (e.target === messageModal) {
+            closeMessageModal();
+        }
+
+        if (e.target === closeChatModal) {
+            closeCloseModal();
+        }
+
+    }
+);
 
 
 // ======================
