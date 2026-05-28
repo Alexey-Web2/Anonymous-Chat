@@ -64,6 +64,15 @@ io.on("connection", (socket) => {
             if (!user) {
                 user = await User.create({ username });
             }
+            
+            if (user.banned) {
+
+    socket.emit(
+        "banned"
+    );
+
+    return;
+}
 
             user.online = true;
             user.socketId = socket.id;
@@ -81,6 +90,9 @@ io.on("connection", (socket) => {
             });
 
             socket.emit("messages", messages);
+            socket.emit(
+    "loginSuccess"
+);
 
         } catch (err) {
             console.error(err);
@@ -572,6 +584,251 @@ socket.on(
                 "supportEndedAdmin",
                 user
             );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
+// ======================
+// ВСЕ ПОЛЬЗОВАТЕЛИ
+// ======================
+
+socket.on(
+    "getAllUsers",
+    async () => {
+
+        try {
+
+            if (!socket.isAdmin)
+                return;
+
+            const users =
+                await User.find()
+                .sort({
+                    username: 1
+                });
+
+            socket.emit(
+                "allUsers",
+                users
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+// ======================
+// БАН / РАЗБАН
+// ======================
+
+socket.on(
+    "toggleBanUser",
+    async (username) => {
+
+        try {
+
+            if (!socket.isAdmin)
+                return;
+
+            const user =
+                await User.findOne({
+                    username
+                });
+
+            if (!user)
+                return;
+
+            user.banned =
+                !user.banned;
+
+            await user.save();
+
+            // если забанили онлайн
+            if (
+                user.banned &&
+                user.socketId
+            ) {
+
+                io.to(
+                    user.socketId
+                ).emit(
+                    "banned"
+                );
+
+            }
+
+            // обновить список
+            const users =
+                await User.find()
+                .sort({
+                    username: 1
+                });
+
+            socket.emit(
+                "allUsers",
+                users
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
+// ======================
+// УДАЛЕНИЕ АККАУНТА
+// ======================
+
+socket.on(
+    "deleteUser",
+    async (username) => {
+
+        try {
+
+            if (!socket.isAdmin)
+                return;
+
+            const user =
+                await User.findOne({
+                    username
+                });
+
+            if (!user)
+                return;
+
+            // удалить сообщения
+            await Message.deleteMany({
+                $or: [
+                    { from: username },
+                    { to: username }
+                ]
+            });
+
+            // удалить поддержку
+            const conversation =
+                await SupportConversation.findOne({
+                    user: username
+                });
+
+            if (conversation) {
+
+                await SupportMessage.deleteMany({
+                    conversationId:
+                        conversation._id
+                });
+
+                await SupportConversation.deleteOne({
+                    _id:
+                        conversation._id
+                });
+
+            }
+
+            // кикнуть если онлайн
+            if (user.socketId) {
+
+                io.to(
+                    user.socketId
+                ).emit(
+                    "accountDeleted"
+                );
+
+            }
+
+            // удалить пользователя
+            await User.deleteOne({
+                username
+            });
+
+            // обновить список
+            const users =
+                await User.find()
+                .sort({
+                    username: 1
+                });
+
+            socket.emit(
+                "allUsers",
+                users
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
+// ======================
+// ПРЕДУПРЕЖДЕНИЕ
+// ======================
+
+socket.on(
+    "sendWarning",
+    async (data) => {
+
+        try {
+
+            if (!socket.isAdmin)
+                return;
+
+            await Message.create({
+
+                from:
+                    ADMIN_USERNAME,
+
+                to:
+                    data.user,
+
+                text:
+                    "⚠ Предупреждение: " +
+                    data.text,
+
+                warning: true
+
+            });
+
+            const target =
+                await User.findOne({
+                    username:
+                        data.user
+                });
+
+            // если онлайн
+            if (
+                target &&
+                target.online &&
+                target.socketId
+            ) {
+
+                io.to(
+                    target.socketId
+                ).emit(
+                    "newPrivateMessage",
+                    {
+                        text:
+                            "⚠ Предупреждение: " +
+                            data.text,
+
+                        warning: true
+                    }
+                );
+
+            }
 
         } catch (err) {
 

@@ -106,13 +106,29 @@
     class="support-fab"
     onclick="openSupport()"
 >
+<!-- Кнопка поддержки -->
+<button
+    id="supportButton"
+    class="support-fab"
+    onclick="openSupport()"
+>
     🛟
+
     <span
         id="supportBadge"
         class="support-badge hidden"
     >
         ●
     </span>
+</button>
+
+<!-- КНОПКА АДМИНКИ -->
+<button
+    id="adminButton"
+    class="admin-fab hidden"
+    onclick="openAdminPanel()"
+>
+    ⚙
 </button>
 
     </section>
@@ -565,6 +581,98 @@
     </div>
 
 </div>
+
+<!-- АДМИН ПАНЕЛЬ -->
+<section
+    id="adminPanel"
+    class="page hidden"
+>
+
+    <header class="chat-header">
+
+        <div class="chat-title">
+            Админ-панель
+        </div>
+
+        <button
+            class="close-chat"
+            onclick="closeAdminPanel()"
+        >
+            ✕
+        </button>
+
+    </header>
+
+    <div
+        id="adminUsersList"
+        class="support-list"
+    ></div>
+    <div
+    id="adminUserModal"
+    class="modal hidden"
+>
+
+    <div class="modal-window">
+
+        <h2 id="adminModalUsername">
+            @username
+        </h2>
+
+        <button
+            class="action-btn"
+            onclick="toggleBanUser()"
+        >
+            Бан / Разбан
+        </button>
+
+        <button
+            class="action-btn"
+            onclick="openWarnModal()"
+        >
+            Предупреждение
+        </button>
+
+        <button
+            class="danger-btn"
+            onclick="deleteUserAccount()"
+        >
+            Удалить аккаунт
+        </button>
+
+    </div>
+
+</div>
+
+<div
+    id="warnModal"
+    class="modal hidden"
+>
+
+    <div class="modal-window">
+
+        <h2>
+            Предупреждение
+        </h2>
+
+        <textarea
+            id="warnText"
+            placeholder="Введите текст..."
+        ></textarea>
+
+        <button
+            class="main-btn"
+            onclick="sendWarning()"
+        >
+            Отправить
+        </button>
+
+    </div>
+
+</div>
+
+</section>
+
+
 
     <!-- Основной JS -->
     <script src="app.js"></script>

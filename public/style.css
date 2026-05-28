@@ -858,3 +858,111 @@ button{
         transform: scale(1);
     }
 }
+.banned-screen {
+
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.banned-card {
+
+    width: 90%;
+    max-width: 420px;
+
+    background: rgba(20,20,20,.9);
+
+    border: 1px solid rgba(255,255,255,.1);
+
+    border-radius: 24px;
+
+    padding: 40px;
+
+    text-align: center;
+
+    color: white;
+
+    backdrop-filter: blur(20px);
+
+}
+
+.banned-card h1 {
+
+    color: #ff4d4d;
+
+    margin-bottom: 20px;
+
+}
+.admin-fab {
+
+    position: fixed;
+
+    right: 24px;
+    bottom: 140px;
+
+    width: 58px;
+    height: 58px;
+
+    border-radius: 50%;
+
+    border: none;
+
+    background: #ff9500;
+
+    color: white;
+
+    font-size: 26px;
+
+    cursor: pointer;
+
+    z-index: 1000;
+
+    box-shadow:
+        0 4px 18px rgba(0,0,0,0.3);
+
+}
+
+.admin-user {
+
+    background: rgba(255,255,255,.05);
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    padding: 18px;
+
+    border-radius: 18px;
+
+    margin-bottom: 12px;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+.admin-user:hover {
+
+    transform: scale(1.02);
+
+}
+
+#adminUsersList {
+
+    height: calc(100vh - 120px);
+
+    overflow-y: auto;
+
+    padding-bottom: 120px;
+
+}
+.admin-user {
+
+    margin-bottom: 12px;
+
+}

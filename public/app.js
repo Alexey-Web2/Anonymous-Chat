@@ -31,6 +31,41 @@ const chatMessages = document.getElementById("chatMessages");
 
 const messagesContainer = document.getElementById("messagesContainer");
 const toast = document.getElementById("errorToast");
+
+const adminButton =
+    document.getElementById(
+        "adminButton"
+    );
+
+const adminPanel =
+    document.getElementById(
+        "adminPanel"
+    );
+
+const adminUsersList =
+    document.getElementById(
+        "adminUsersList"
+    );
+    
+const adminUserModal =
+    document.getElementById(
+        "adminUserModal"
+    );
+
+const adminModalUsername =
+    document.getElementById(
+        "adminModalUsername"
+    );
+
+const warnModal =
+    document.getElementById(
+        "warnModal"
+    );
+
+const warnText =
+    document.getElementById(
+        "warnText"
+    );
 // ======================
 // ПОДДЕРЖКА
 // ======================
@@ -95,6 +130,7 @@ const adminCloseModal =
 // ======================
 
 let currentUser = null;
+let selectedAdminUser = null;
 let roomSize = 2;
 let loggedIn = false;
 let supportOpened = false;
@@ -104,41 +140,80 @@ let currentSupportUser = null;
 const ADMIN_USERNAME =
     "@ChatAdmin";
 
+
 // ======================
 // LOGIN
 // ======================
 
 function login() {
 
-    const username = usernameInput.value.trim();
+    const username =
+        usernameInput.value.trim();
 
     if (!username) {
-        showToast("Введите username");
+
+        showToast(
+            "Введите username"
+        );
+
         return;
     }
 
     if (loggedIn) return;
 
-    currentUser = username.startsWith("@")
+    currentUser =
+        username.startsWith("@")
         ? username
         : "@" + username;
 
-    localStorage.setItem("username", currentUser);
+    localStorage.setItem(
+        "username",
+        currentUser
+    );
 
-    profileUsername.textContent = currentUser;
+    profileUsername.textContent =
+        currentUser;
 
-    avatar.textContent = currentUser
+    avatar.textContent =
+        currentUser
         .replace("@", "")
         .charAt(0)
         .toUpperCase();
 
-    loginPage.classList.add("hidden");
-    homePage.classList.remove("hidden");
-
     loggedIn = true;
 
-    socket.emit("login", currentUser);
+    socket.emit(
+        "login",
+        currentUser
+    );
+
+    // показать кнопку админа
+    if (
+        currentUser ===
+        "@ChatAdmin"
+    ) {
+
+        adminButton.classList.remove(
+            "hidden"
+        );
+
+    }
+
 }
+socket.once(
+    "loginSuccess",
+    () => {
+
+        loginPage.classList.add(
+            "hidden"
+        );
+
+        homePage.classList.remove(
+            "hidden"
+        );
+
+    }
+);
 
 // ======================
 // ЗАГРУЗКА СЕССИИ
@@ -154,6 +229,16 @@ window.addEventListener("load", () => {
     if (saved) {
 
         currentUser = saved;
+        if (
+    currentUser ===
+    ADMIN_USERNAME
+) {
+
+    adminButton.classList.remove(
+        "hidden"
+    );
+
+}
         loggedIn = true;
 
         profileUsername.textContent =
@@ -420,25 +505,53 @@ function sendPrivateMessage() {
 // ВХОДЯЩИЕ СООБЩЕНИЯ (ГЛАВНЫЙ ЭКРАН)
 // ======================
 
-socket.on("messages", (msgs) => {
+socket.on(
+    "messages",
+    (msgs) => {
 
-    msgs.forEach(msg => {
-        addInboxMessage(msg.text);
-    });
+        msgs.forEach(msg => {
 
-});
+            addInboxMessage(
+                msg.text,
+                msg.warning
+            );
+
+        });
+
+    }
+);
 
 // добавление в inbox
-function addInboxMessage(text) {
 
-    const div = document.createElement("div");
+function addInboxMessage(
+    text,
+    warning = false
+) {
 
-    div.className = "inbox-message";
+    const div =
+        document.createElement("div");
 
-    // ❗ без имени отправителя
-    div.textContent = text;
+    div.className =
+        "inbox-message";
 
-    messagesContainer.appendChild(div);
+    // предупреждение
+    if (warning) {
+
+        div.style.background =
+            "#7F1D1D";
+
+        div.style.border =
+            "1px solid #EF4444";
+
+    }
+
+    div.textContent =
+        text;
+
+    messagesContainer.appendChild(
+        div
+    );
+
 }
 
 // ======================
@@ -1058,24 +1171,283 @@ window.addEventListener(
         }
 
         if (e.target === roomSelectorModal) {
+
             roomSelectorModal.classList.add(
                 "hidden"
             );
+
+        }
+
+        if (e.target === adminPanel) {
+            closeAdminPanel();
+        }
+
+        // закрытие окна пользователя
+        if (e.target === adminUserModal) {
+
+            adminUserModal.classList.add(
+                "hidden"
+            );
+
+        }
+
+        // закрытие окна предупреждения
+        if (e.target === warnModal) {
+
+            warnModal.classList.add(
+                "hidden"
+            );
+
         }
 
         if (e.target === profileModal) {
+
             profileModal.classList.add(
                 "hidden"
             );
+
         }
 
         if (e.target === messageModal) {
+
             closeMessageModal();
+
         }
 
         if (e.target === closeChatModal) {
+
             closeCloseModal();
+
         }
+
+    }
+);
+
+socket.on(
+    "accountDeleted",
+    () => {
+
+        localStorage.removeItem(
+            "username"
+        );
+
+        document.body.innerHTML = `
+
+            <div class="banned-screen">
+
+                <div class="banned-card">
+
+                    <h1>
+                        Аккаунт удалён
+                    </h1>
+
+                    <p>
+                        Ваш аккаунт был удалён администрацией
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+);
+socket.on(
+    "banned",
+    () => {
+
+        document.body.innerHTML = `
+
+            <div class="banned-screen">
+
+                <div class="banned-card">
+
+                    <h1>
+                        Аккаунт заблокирован
+                    </h1>
+
+                    <p>
+                        Вы были заблокированы администрацией
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+);
+
+// ======================
+// АДМИН ПАНЕЛЬ
+// ======================
+
+function openAdminPanel() {
+
+    socket.emit(
+        "getAllUsers"
+    );
+
+    homePage.classList.add(
+        "hidden"
+    );
+
+    adminPanel.classList.remove(
+        "hidden"
+    );
+
+}
+
+function closeAdminPanel() {
+
+    adminPanel.classList.add(
+        "hidden"
+    );
+
+    homePage.classList.remove(
+        "hidden"
+    );
+
+}
+
+socket.on(
+    "allUsers",
+    (users) => {
+
+        adminUsersList.innerHTML =
+            "";
+
+        users.forEach(user => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.className =
+                "admin-user";
+            div.onclick = () => {
+
+    selectedAdminUser =
+        user.username;
+
+    adminModalUsername.textContent =
+        user.username;
+
+    adminUserModal.classList.remove(
+        "hidden"
+    );
+
+};
+
+            div.innerHTML = `
+
+                <div>
+                    ${user.username}
+                </div>
+
+            `;
+
+            adminUsersList.appendChild(
+                div
+            );
+
+        });
+
+    }
+);
+function toggleBanUser() {
+
+    socket.emit(
+        "toggleBanUser",
+        selectedAdminUser
+    );
+
+}
+
+function deleteUserAccount() {
+
+    socket.emit(
+        "deleteUser",
+        selectedAdminUser
+    );
+
+    adminUserModal.classList.add(
+        "hidden"
+    );
+
+}
+
+function openWarnModal() {
+
+    warnModal.classList.remove(
+        "hidden"
+    );
+
+}
+
+function sendWarning() {
+
+    const text =
+        warnText.value.trim();
+
+    if (!text) return;
+
+    socket.emit(
+        "sendWarning",
+        {
+            user:
+                selectedAdminUser,
+
+            text
+        }
+    );
+
+    warnText.value = "";
+
+    warnModal.classList.add(
+        "hidden"
+    );
+
+    showToast(
+        "Предупреждение отправлено"
+    );
+
+}
+socket.on(
+    "warningReceived",
+    (text) => {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+        div.className =
+            "inbox-message";
+
+        div.style.background =
+            "#7F1D1D";
+
+        div.style.border =
+            "1px solid #EF4444";
+
+        div.innerHTML = `
+            <b>
+                ⚠ Предупреждение:
+            </b><br>
+            ${text}
+        `;
+
+        messagesContainer.prepend(
+            div
+        );
+
+        showToast(
+            "⚠ Получено предупреждение"
+        );
 
     }
 );
