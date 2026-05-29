@@ -33,6 +33,19 @@ mongoose.connect(process.env.MONGO_URI)
     console.error(err);
 });
 
+const TelegramBot =
+    require(
+        "node-telegram-bot-api"
+    );
+
+const bot =
+    new TelegramBot(
+        process.env.TELEGRAM_BOT_TOKEN,
+        {
+            polling: true
+        }
+    );
+
 // ======================
 // ДАННЫЕ ОНЛАЙН / ПОИСК
 // ======================
@@ -45,6 +58,33 @@ const ADMIN_USERNAME = "@ChatAdmin";
 // SOCKET
 // ======================
 
+bot.on(
+    "message",
+    async (msg) => {
+
+        const username =
+            msg.from.username;
+
+        if (!username)
+            return;
+
+        const appUsername =
+            "@" + username;
+
+        await User.updateOne(
+            {
+                username:
+                    appUsername
+            },
+            {
+                telegramChatId:
+                    msg.chat.id
+            }
+        );
+
+    }
+);
+
 io.on("connection", (socket) => {
 
     console.log("Connected:", socket.id);
@@ -55,50 +95,194 @@ io.on("connection", (socket) => {
     // LOGIN
     // ======================
 
-    socket.on("login", async (username) => {
+socket.on(
+    "login",
+    async (username) => {
 
         try {
 
-            let user = await User.findOne({ username });
+            let user =
+                await User.findOne({
+                    username
+                });
 
             if (!user) {
-                user = await User.create({ username });
+
+                user =
+                    await User.create({
+                        username
+                    });
+
             }
-            
+
             if (user.banned) {
 
-    socket.emit(
-        "banned"
-    );
+                socket.emit(
+                    "banned"
+                );
 
-    return;
-}
+                return;
 
-            user.online = true;
-            user.socketId = socket.id;
+            }
+
+            socket.username =
+                username;
+
+            if (
+                username ===
+                ADMIN_USERNAME
+            ) {
+
+                socket.isAdmin =
+                    true;
+
+            }
+
+            socket.emit(
+                "needCode"
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
+socket.on(
+    "sendLoginCode",
+    async () => {
+
+        try {
+
+            const user =
+                await User.findOne({
+                    username:
+                        socket.username
+                });
+
+            if (
+                !user ||
+                !user.telegramChatId
+            ) {
+
+                socket.emit(
+                    "telegramNotLinked"
+                );
+
+                return;
+
+            }
+
+            const code =
+                Math.floor(
+                    100000 +
+                    Math.random() *
+                    900000
+                ).toString();
+
+            user.loginCode =
+                code;
+
+            user.codeExpires =
+                Date.now() +
+                5 * 60 * 1000;
 
             await user.save();
 
-            socket.username = username;
-            if (username === ADMIN_USERNAME) {
-    socket.isAdmin = true;
-}
+            await bot.sendMessage(
+                user.telegramChatId,
+                `Ваш код входа: ${code}`
+            );
 
-            // 👉 ВСЕ сообщения остаются навсегда
-            const messages = await Message.find({
-                to: username
-            });
-
-            socket.emit("messages", messages);
             socket.emit(
-    "loginSuccess"
-);
+                "codeSent"
+            );
 
         } catch (err) {
+
             console.error(err);
+
         }
 
-    });
+    }
+);
+
+socket.on(
+    "verifyLoginCode",
+    async (code) => {
+
+        try {
+
+            const user =
+                await User.findOne({
+                    username:
+                        socket.username
+                });
+
+            if (!user) return;
+
+            if (
+                user.loginCode !== code
+            ) {
+
+                socket.emit(
+                    "wrongCode"
+                );
+
+                return;
+
+            }
+
+            if (
+                new Date() >
+                user.codeExpires
+            ) {
+
+                socket.emit(
+                    "wrongCode"
+                );
+
+                return;
+
+            }
+
+            user.online = true;
+
+            user.socketId =
+                socket.id;
+
+            user.loginCode =
+                null;
+
+            await user.save();
+
+            const messages =
+                await Message.find({
+                    to:
+                        socket.username
+                });
+
+            socket.emit(
+                "messages",
+                messages
+            );
+
+            socket.emit(
+                "loginSuccess"
+            );
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+);
+
 
     // ======================
     // ПОИСК СОБЕСЕДНИКА

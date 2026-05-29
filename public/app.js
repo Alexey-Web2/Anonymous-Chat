@@ -124,6 +124,16 @@ const adminCloseModal =
     document.getElementById(
         "adminCloseModal"
     );
+    
+const codeModal =
+    document.getElementById(
+        "codeModal"
+    );
+
+const codeInput =
+    document.getElementById(
+        "codeInput"
+    );
 
 // ======================
 // ДАННЫЕ
@@ -180,7 +190,6 @@ function login() {
         .charAt(0)
         .toUpperCase();
 
-    loggedIn = true;
 
     socket.emit(
         "login",
@@ -204,12 +213,28 @@ socket.once(
     "loginSuccess",
     () => {
 
+        loggedIn = true;
+
+        codeModal.classList.add(
+            "hidden"
+        );
+
         loginPage.classList.add(
             "hidden"
         );
 
         homePage.classList.remove(
             "hidden"
+        );
+
+    }
+);
+socket.on(
+    "telegramNotLinked",
+    () => {
+
+        showToast(
+            "Сначала запустите Telegram бота"
         );
 
     }
@@ -1451,6 +1476,59 @@ socket.on(
 
     }
 );
+socket.on(
+    "needCode",
+    () => {
+
+        codeModal.classList.remove(
+            "hidden"
+        );
+
+    }
+);
+function sendLoginCode() {
+
+    socket.emit(
+        "sendLoginCode"
+    );
+
+}
+
+codeInput.addEventListener(
+    "input",
+    () => {
+
+        const code =
+            codeInput.value.trim();
+
+        if (
+            code.length === 6
+        ) {
+
+            socket.emit(
+                "verifyLoginCode",
+                code
+            );
+
+        }
+
+    }
+);
+
+socket.on(
+    "wrongCode",
+    () => {
+
+        codeInput.value = "";
+
+        showToast(
+            "Неверный код"
+        );
+
+    }
+);
+
+
 
 
 // ======================

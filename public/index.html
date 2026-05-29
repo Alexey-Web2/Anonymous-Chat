@@ -582,6 +582,8 @@
 
 </div>
 
+
+
 <!-- АДМИН ПАНЕЛЬ -->
 <section
     id="adminPanel"
@@ -671,6 +673,50 @@
 </div>
 
 </section>
+
+<div
+    id="codeModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content">
+
+        <h2>
+            Подтверждение входа
+        </h2>
+
+        <div class="code-instructions">
+
+            <p>
+                1. Зайди в Telegram и запусти бота
+            </p>
+
+            <p>
+                2. Нажми кнопку отправить код
+            </p>
+
+            <p>
+                3. Введи код который придёт в бота
+            </p>
+
+        </div>
+
+        <button
+            onclick="sendLoginCode()"
+            class="main-btn"
+        >
+            Отправить код
+        </button>
+
+        <input
+            id="codeInput"
+            maxlength="6"
+            placeholder="000000"
+        />
+
+    </div>
+
+</div>
 
 
 

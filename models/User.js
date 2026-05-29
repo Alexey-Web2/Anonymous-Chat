@@ -21,6 +21,22 @@ const UserSchema =
             default: false
         },
 
+        // TELEGRAM
+        telegramChatId: {
+            type: String,
+            default: null
+        },
+
+        loginCode: {
+            type: String,
+            default: null
+        },
+
+        codeExpires: {
+            type: Date,
+            default: null
+        },
+
         // ПРЕДУПРЕЖДЕНИЯ
         warnings: [
             {

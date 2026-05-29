@@ -966,3 +966,16 @@ button{
     margin-bottom: 12px;
 
 }
+.code-instructions {
+    margin-bottom: 20px;
+    color: #ccc;
+    font-size: 14px;
+}
+
+#codeInput {
+    width: 100%;
+    margin-top: 15px;
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 8px;
+}
