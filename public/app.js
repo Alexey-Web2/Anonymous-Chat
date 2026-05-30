@@ -134,6 +134,16 @@ const codeInput =
     document.getElementById(
         "codeInput"
     );
+    
+const codePage =
+    document.getElementById(
+        "codePage"
+    );
+
+const sendCodeBtn =
+    document.getElementById(
+        "sendCodeBtn"
+    );
 
 // ======================
 // ДАННЫЕ
@@ -144,6 +154,8 @@ let selectedAdminUser = null;
 let roomSize = 2;
 let loggedIn = false;
 let supportOpened = false;
+let codeCooldown = false;
+let codeCooldownTimer = null;
 
 let currentSupportUser = null;
 
@@ -209,17 +221,13 @@ function login() {
     }
 
 }
-socket.once(
+socket.on(
     "loginSuccess",
     () => {
 
         loggedIn = true;
 
-        codeModal.classList.add(
-            "hidden"
-        );
-
-        loginPage.classList.add(
+        codePage.classList.add(
             "hidden"
         );
 
@@ -243,54 +251,14 @@ socket.on(
 // ======================
 // ЗАГРУЗКА СЕССИИ
 // ======================
-
 window.addEventListener("load", () => {
 
-    const saved =
-        localStorage.getItem(
-            "username"
-        );
-
-    if (saved) {
-
-        currentUser = saved;
-        if (
-    currentUser ===
-    ADMIN_USERNAME
-) {
-
-    adminButton.classList.remove(
-        "hidden"
+    sessionStorage.removeItem(
+        "codeVerified"
     );
 
-}
-        loggedIn = true;
-
-        profileUsername.textContent =
-            saved;
-
-        avatar.textContent =
-            saved
-                .replace("@", "")
-                .charAt(0)
-                .toUpperCase();
-
-        loginPage.classList.add(
-            "hidden"
-        );
-
-        homePage.classList.remove(
-            "hidden"
-        );
-
-        socket.emit(
-            "login",
-            currentUser
-        );
-
-    }
-
 });
+
 
 // ======================
 // ПОИСК СОБЕСЕДНИКА
@@ -620,11 +588,12 @@ function openProfile() {
 
 function logout() {
 
-    localStorage.removeItem("username");
+    sessionStorage.clear();
 
     socket.disconnect();
 
     location.reload();
+
 }
 
 // ======================
@@ -1480,13 +1449,20 @@ socket.on(
     "needCode",
     () => {
 
-        codeModal.classList.remove(
+        loginPage.classList.add(
+            "hidden"
+        );
+
+        codePage.classList.remove(
             "hidden"
         );
 
     }
 );
 function sendLoginCode() {
+
+    if (codeCooldown)
+        return;
 
     socket.emit(
         "sendLoginCode"
@@ -1525,11 +1501,67 @@ socket.on(
             "Неверный код"
         );
 
+        codeInput.focus();
+
     }
 );
+function closeCodePage() {
+
+    codePage.classList.add(
+        "hidden"
+    );
+
+    loginPage.classList.remove(
+        "hidden"
+    );
+
+}
 
 
+socket.on(
+    "codeSent",
+    () => {
 
+        let seconds = 30;
+
+        codeCooldown = true;
+
+        sendCodeBtn.disabled =
+            true;
+
+        sendCodeBtn.textContent =
+            `Повтор через ${seconds}с`;
+
+        const timer =
+            setInterval(() => {
+
+                seconds--;
+
+                sendCodeBtn.textContent =
+                    `Повтор через ${seconds}с`;
+
+                if (
+                    seconds <= 0
+                ) {
+
+                    clearInterval(
+                        timer
+                    );
+
+                    codeCooldown = false;
+
+                    sendCodeBtn.disabled =
+                        false;
+
+                    sendCodeBtn.textContent =
+                        "Отправить код";
+
+                }
+
+            }, 1000);
+
+    }
+);
 
 // ======================
 // ENTER ОБРАБОТКА

@@ -7,721 +7,345 @@
 
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <!-- Фон -->
-    <div class="background"></div>
+<div class="background"></div>
 
-    <!-- Страница входа -->
-    <section id="loginPage" class="page">
+<!-- ======================
+LOGIN
+====================== -->
+<section id="loginPage" class="page">
 
-        <div class="login-card">
+    <div class="login-card">
 
-            <div class="logo-circle">
-                A
-            </div>
+        <div class="logo-circle">A</div>
 
-            <h1>Anonymous Chat</h1>
+        <h1>Anonymous Chat</h1>
 
-            <p class="subtitle">
-                Общайся анонимно с людьми по всему миру
-            </p>
+        <p class="subtitle">
+            Общайся анонимно с людьми по всему миру
+        </p>
 
-            <input
-                id="usernameInput"
-                type="text"
-                placeholder="@telegram_username"
-            >
+        <input id="usernameInput" type="text" placeholder="@telegram_username">
 
-            <button
-                class="main-btn"
-                onclick="login()"
-            >
-                Войти
-            </button>
-
-        </div>
-
-    </section>
-
-    <!-- Главное меню -->
-    <section
-        id="homePage"
-        class="page hidden"
-    >
-
-        <header class="topbar">
-
-            <div class="logo-small">
-                AC
-            </div>
-
-            <h2>
-                Anonymous Chat
-            </h2>
-
-            <button
-                class="profile-button"
-                onclick="openProfile()"
-            >
-                ☰
-            </button>
-
-        </header>
-
-        <div class="content">
-
-            <div id="messagesContainer">
-
-                <div class="empty-state">
-
-                    <div class="empty-icon">
-                        💬
-                    </div>
-
-                    <h3>
-                        Пока нет сообщений
-                    </h3>
-
-                    <p>
-                        Здесь будут появляться входящие сообщения
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <button
-            class="fab"
-            onclick="openActions()"
-        >
-            +
+        <button class="main-btn" onclick="login()">
+            Войти
         </button>
-        
-        <!-- Кнопка поддержки -->
-<button
-    id="supportButton"
-    class="support-fab"
-    onclick="openSupport()"
->
-<!-- Кнопка поддержки -->
-<button
-    id="supportButton"
-    class="support-fab"
-    onclick="openSupport()"
->
-    🛟
-
-    <span
-        id="supportBadge"
-        class="support-badge hidden"
-    >
-        ●
-    </span>
-</button>
-
-<!-- КНОПКА АДМИНКИ -->
-<button
-    id="adminButton"
-    class="admin-fab hidden"
-    onclick="openAdminPanel()"
->
-    ⚙
-</button>
-
-    </section>
-
-    <!-- Меню действий -->
-    <div
-        id="actionsModal"
-        class="modal hidden"
-    >
-
-        <div class="modal-window">
-
-            <h2>
-                Выберите действие
-            </h2>
-
-            <button
-    class="action-btn"
-    onclick="openRoomSelector()"
->
-    Найти собеседника
-</button>
-
-            <button
-                class="action-btn"
-                onclick="openMessageModal()"
-            >
-                Написать сообщение
-            </button>
-
-        </div>
-        <!-- ВЫБОР КОЛИЧЕСТВА УЧАСТНИКОВ -->
 
     </div>
-    
-    <div
-    id="roomSelectorModal"
-    class="modal hidden"
->
 
+</section>
+
+<!-- ======================
+HOME
+====================== -->
+<section id="homePage" class="page hidden">
+
+    <header class="topbar">
+
+        <div class="logo-small">AC</div>
+
+        <h2>Anonymous Chat</h2>
+
+        <button class="profile-button" onclick="openProfile()">
+            ☰
+        </button>
+
+    </header>
+
+    <div class="content">
+
+        <div id="messagesContainer">
+
+            <div class="empty-state">
+                <div class="empty-icon">💬</div>
+                <h3>Пока нет сообщений</h3>
+                <p>Здесь будут появляться входящие сообщения</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <button class="fab" onclick="openActions()">+</button>
+
+    <!-- support -->
+    <button id="supportButton" class="support-fab" onclick="openSupport()">
+        🛟
+        <span id="supportBadge" class="support-badge hidden">●</span>
+    </button>
+
+    <!-- admin -->
+    <button id="adminButton" class="admin-fab hidden" onclick="openAdminPanel()">
+        ⚙
+    </button>
+
+</section>
+
+<!-- ======================
+ACTIONS
+====================== -->
+<div id="actionsModal" class="modal hidden">
     <div class="modal-window">
 
-        <h2>
-            Выберите количество участников
-        </h2>
+        <h2>Выберите действие</h2>
 
-        <button
-            class="action-btn"
-            onclick="startSearch(2)"
-        >
-            2 человека
+        <button class="action-btn" onclick="openRoomSelector()">
+            Найти собеседника
         </button>
 
-        <button
-            class="action-btn"
-            onclick="startSearch(3)"
-        >
-            3 человека
-        </button>
-
-        <button
-            class="action-btn"
-            onclick="startSearch(4)"
-        >
-            4 человека
+        <button class="action-btn" onclick="openMessageModal()">
+            Написать сообщение
         </button>
 
     </div>
-  </div>
-
-    <!-- Поиск собеседника -->
-    <div
-        id="searchModal"
-        class="modal hidden"
-    >
-
-        <div class="modal-window">
-
-            <div class="search-loader"></div>
-
-            <h2>
-                Поиск собеседника...
-            </h2>
-
-            <p id="searchCount">
-    Найдено: 1/2
-</p>
-
-            <button
-                class="cancel-btn"
-                onclick="cancelSearch()"
-            >
-                Отменить поиск
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- Отправка сообщения -->
-    <div
-        id="messageModal"
-        class="modal hidden"
-    >
-
-        <div class="modal-window">
-
-            <h2>
-                Отправить сообщение
-            </h2>
-
-            <input
-                type="text"
-                placeholder="@username"
-                id="targetUser"
-            >
-
-            <textarea
-                id="messageText"
-                placeholder="Введите сообщение..."
-            ></textarea>
-
-            <button
-                class="main-btn"
-                onclick="sendPrivateMessage()"
-            >
-                Отправить
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- Профиль -->
-    <div
-        id="profileModal"
-        class="modal hidden"
-    >
-
-        <div class="modal-window">
-
-            <div
-                id="avatar"
-                class="avatar"
-            >
-                A
-            </div>
-
-            <h2 id="profileUsername">
-                @username
-            </h2>
-
-            <button
-                class="logout-btn"
-                onclick="logout()"
-            >
-                Выйти
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- Чат -->
-    <section
-        id="chatPage"
-        class="chat-page hidden"
-    >
-
-        <header class="chat-header">
-
-            <div class="chat-user">
-
-                <div class="chat-avatar">
-                    ?
-                </div>
-
-                <div>
-
-                    <div class="chat-title">
-                        Случайный пользователь
-                    </div>
-
-                    <div class="chat-status">
-                        Онлайн
-                    </div>
-
-                </div>
-
-            </div>
-
-            <button
-                class="close-chat"
-                onclick="openCloseChatModal()"
-            >
-                ✕
-            </button>
-
-        </header>
-
-        <div
-            id="chatMessages"
-            class="chat-messages"
-        >
-
-        </div>
-
-        <div class="chat-input-container">
-
-            <input
-                id="chatInput"
-                type="text"
-                placeholder="Введите сообщение..."
-            >
-
-            <button
-                class="send-button"
-                onclick="sendMessage()"
-            >
-                ➤
-            </button>
-
-        </div>
-
-    </section>
-
-    <!-- Подтверждение завершения -->
-    <div
-        id="closeChatModal"
-        class="modal hidden"
-    >
-
-        <div class="modal-window">
-
-            <h2>
-                Завершить чат?
-            </h2>
-
-            <p>
-                После завершения вы вернётесь в главное меню
-            </p>
-
-            <button
-                class="action-btn"
-                onclick="closeCloseModal()"
-            >
-                Вернуться в чат
-            </button>
-
-            <button
-                class="danger-btn"
-                onclick="endChat()"
-            >
-                Завершить чат
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- Уведомление -->
-    <div
-        id="errorToast"
-        class="toast hidden"
-    >
-        Ошибка
-    </div>
-
-    <!-- Socket.IO -->
-    <script src="/socket.io/socket.io.js"></script>
-    <!-- ЧАТ ПОДДЕРЖКИ -->
-<section
-    id="supportPage"
-    class="chat-page hidden"
->
-
-    <header class="chat-header">
-
-        <div class="chat-user">
-
-            <div class="chat-avatar">
-                🛟
-            </div>
-
-            <div>
-
-                <div class="chat-title">
-                    Поддержка
-                </div>
-
-                <div class="chat-status">
-                    Онлайн
-                </div>
-
-            </div>
-
-        </div>
-
-        <button
-            class="close-chat"
-            onclick="closeSupport()"
-        >
-            ✕
-        </button>
-
-    </header>
-
-    <div
-        id="supportMessages"
-        class="chat-messages"
-    ></div>
-
-    <div class="chat-input-container">
-
-        <input
-            id="supportInput"
-            type="text"
-            placeholder="Напишите сообщение..."
-        >
-
-        <button
-            class="send-button"
-            onclick="sendSupportMessage()"
-        >
-            ➤
-        </button>
-
-    </div>
-
-</section>
-<!-- СПИСОК ОБРАЩЕНИЙ -->
-<section
-    id="supportListPage"
-    class="page hidden"
->
-
-    <header class="chat-header">
-
-        <div class="chat-title">
-            Запросы поддержки
-        </div>
-
-        <button
-            class="close-chat"
-            onclick="closeSupportList()"
-        >
-            ✕
-        </button>
-
-    </header>
-
-    <div
-        id="supportList"
-        class="support-list"
-    ></div>
-
-</section>
-<!-- ДИАЛОГ АДМИНА -->
-<section
-    id="adminSupportPage"
-    class="chat-page hidden"
->
-
-    <header class="chat-header">
-
-        <div class="chat-user">
-
-            <div class="chat-avatar">
-                👤
-            </div>
-
-            <div>
-
-                <div
-                    id="adminSupportUser"
-                    class="chat-title"
-                >
-                    @username
-                </div>
-
-            </div>
-
-        </div>
-
-        <button
-            class="close-chat"
-            onclick="openAdminCloseModal()"
-        >
-            ✕
-        </button>
-
-    </header>
-
-    <div
-        id="adminSupportMessages"
-        class="chat-messages"
-    ></div>
-
-    <div class="chat-input-container">
-
-        <input
-            id="adminSupportInput"
-            type="text"
-            placeholder="Ответ..."
-        >
-
-        <button
-            class="send-button"
-            onclick="sendAdminSupportMessage()"
-        >
-            ➤
-        </button>
-
-    </div>
-
-</section>
-<!-- ВЫХОД ИЗ ДИАЛОГА -->
-<div
-    id="adminCloseModal"
-    class="modal hidden"
->
-
-    <div class="modal-window">
-
-        <h2>
-            Завершение диалога
-        </h2>
-
-        <button
-            class="action-btn"
-            onclick="closeAdminCloseModal()"
-        >
-            Вернуться в чат
-        </button>
-
-        <button
-            class="action-btn"
-            onclick="leaveAdminChat()"
-        >
-            Выйти из чата
-        </button>
-
-        <button
-            class="danger-btn"
-            onclick="endSupportConversation()"
-        >
-            Завершить чат
-        </button>
-
-    </div>
-
 </div>
 
-
-
-<!-- АДМИН ПАНЕЛЬ -->
-<section
-    id="adminPanel"
-    class="page hidden"
->
-
-    <header class="chat-header">
-
-        <div class="chat-title">
-            Админ-панель
-        </div>
-
-        <button
-            class="close-chat"
-            onclick="closeAdminPanel()"
-        >
-            ✕
-        </button>
-
-    </header>
-
-    <div
-        id="adminUsersList"
-        class="support-list"
-    ></div>
-    <div
-    id="adminUserModal"
-    class="modal hidden"
->
-
+<!-- ======================
+ROOM SELECT
+====================== -->
+<div id="roomSelectorModal" class="modal hidden">
     <div class="modal-window">
 
-        <h2 id="adminModalUsername">
-            @username
-        </h2>
+        <h2>Выберите количество участников</h2>
 
-        <button
-            class="action-btn"
-            onclick="toggleBanUser()"
-        >
-            Бан / Разбан
-        </button>
+        <button class="action-btn" onclick="startSearch(2)">2 человека</button>
+        <button class="action-btn" onclick="startSearch(3)">3 человека</button>
+        <button class="action-btn" onclick="startSearch(4)">4 человека</button>
 
-        <button
-            class="action-btn"
-            onclick="openWarnModal()"
-        >
-            Предупреждение
-        </button>
+    </div>
+</div>
 
-        <button
-            class="danger-btn"
-            onclick="deleteUserAccount()"
-        >
-            Удалить аккаунт
+<!-- ======================
+SEARCH
+====================== -->
+<div id="searchModal" class="modal hidden">
+    <div class="modal-window">
+
+        <div class="search-loader"></div>
+
+        <h2>Поиск собеседника...</h2>
+
+        <p id="searchCount">Найдено: 1/2</p>
+
+        <button class="cancel-btn" onclick="cancelSearch()">
+            Отменить поиск
         </button>
 
     </div>
-
 </div>
 
-<div
-    id="warnModal"
-    class="modal hidden"
->
-
+<!-- ======================
+MESSAGE
+====================== -->
+<div id="messageModal" class="modal hidden">
     <div class="modal-window">
 
-        <h2>
-            Предупреждение
-        </h2>
+        <h2>Отправить сообщение</h2>
 
-        <textarea
-            id="warnText"
-            placeholder="Введите текст..."
-        ></textarea>
+        <input id="targetUser" type="text" placeholder="@username">
 
-        <button
-            class="main-btn"
-            onclick="sendWarning()"
-        >
+        <textarea id="messageText" placeholder="Введите сообщение..."></textarea>
+
+        <button class="main-btn" onclick="sendPrivateMessage()">
             Отправить
         </button>
 
     </div>
-
 </div>
 
-</section>
+<!-- ======================
+PROFILE
+====================== -->
+<div id="profileModal" class="modal hidden">
+    <div class="modal-window">
 
-<div
-    id="codeModal"
-    class="modal hidden"
->
+        <div id="avatar" class="avatar">A</div>
 
-    <div class="modal-content">
+        <h2 id="profileUsername">@username</h2>
 
-        <h2>
-            Подтверждение входа
-        </h2>
+        <button class="logout-btn" onclick="logout()">
+            Выйти
+        </button>
 
-        <div class="code-instructions">
+    </div>
+</div>
 
-            <p>
-                1. Зайди в Telegram и запусти бота
-            </p>
+<!-- ======================
+CHAT
+====================== -->
+<section id="chatPage" class="chat-page hidden">
 
-            <p>
-                2. Нажми кнопку отправить код
-            </p>
+    <header class="chat-header">
 
-            <p>
-                3. Введи код который придёт в бота
-            </p>
+        <div class="chat-user">
+
+            <div class="chat-avatar">?</div>
+
+            <div>
+                <div class="chat-title">Случайный пользователь</div>
+                <div class="chat-status">Онлайн</div>
+            </div>
 
         </div>
 
-        <button
-            onclick="sendLoginCode()"
-            class="main-btn"
-        >
-            Отправить код
+        <button class="close-chat" onclick="openCloseChatModal()">
+            ✕
         </button>
 
-        <input
-            id="codeInput"
-            maxlength="6"
-            placeholder="000000"
-        />
+    </header>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input-container">
+
+        <input id="chatInput" type="text" placeholder="Введите сообщение...">
+
+        <button class="send-button" onclick="sendMessage()">➤</button>
 
     </div>
 
+</section>
+
+<!-- ======================
+CLOSE CHAT
+====================== -->
+<div id="closeChatModal" class="modal hidden">
+    <div class="modal-window">
+
+        <h2>Завершить чат?</h2>
+
+        <p>После завершения вы вернётесь в главное меню</p>
+
+        <button class="action-btn" onclick="closeCloseModal()">
+            Вернуться
+        </button>
+
+        <button class="danger-btn" onclick="endChat()">
+            Завершить
+        </button>
+
+    </div>
 </div>
 
+<!-- ======================
+TOAST
+====================== -->
+<div id="errorToast" class="toast hidden">
+    Ошибка
+</div>
 
+<!-- ======================
+SUPPORT
+====================== -->
+<section id="supportPage" class="chat-page hidden">
+    <header class="chat-header">
 
-    <!-- Основной JS -->
-    <script src="app.js"></script>
+        <div class="chat-user">
+            <div class="chat-avatar">🛟</div>
+            <div class="chat-title">Поддержка</div>
+        </div>
+
+        <button class="close-chat" onclick="closeSupport()">✕</button>
+
+    </header>
+
+    <div id="supportMessages" class="chat-messages"></div>
+
+    <div class="chat-input-container">
+        <input id="supportInput" type="text" placeholder="Сообщение...">
+        <button class="send-button" onclick="sendSupportMessage()">➤</button>
+    </div>
+</section>
+
+<!-- ======================
+SUPPORT LIST
+====================== -->
+<section id="supportListPage" class="page hidden">
+
+    <header class="chat-header">
+        <div class="chat-title">Запросы поддержки</div>
+        <button class="close-chat" onclick="closeSupportList()">✕</button>
+    </header>
+
+    <div id="supportList" class="support-list"></div>
+
+</section>
+
+<!-- ======================
+ADMIN SUPPORT
+====================== -->
+<section id="adminSupportPage" class="chat-page hidden">
+
+    <header class="chat-header">
+
+        <div class="chat-user">
+            <div class="chat-avatar">👤</div>
+            <div id="adminSupportUser" class="chat-title">@username</div>
+        </div>
+
+        <button class="close-chat" onclick="openAdminCloseModal()">✕</button>
+
+    </header>
+
+    <div id="adminSupportMessages" class="chat-messages"></div>
+
+    <div class="chat-input-container">
+        <input id="adminSupportInput" type="text" placeholder="Ответ...">
+        <button class="send-button" onclick="sendAdminSupportMessage()">➤</button>
+    </div>
+
+</section>
+
+<!-- ======================
+ADMIN PANEL
+====================== -->
+<section id="adminPanel" class="page hidden">
+
+    <header class="chat-header">
+        <div class="chat-title">Админ-панель</div>
+        <button class="close-chat" onclick="closeAdminPanel()">✕</button>
+    </header>
+
+    <div id="adminUsersList" class="support-list"></div>
+
+</section>
+
+<!-- ======================
+CODE PAGE (LOGIN)
+====================== -->
+<section id="codePage" class="page hidden">
+
+    <div class="login-card">
+
+        <button class="close-auth" onclick="closeCodePage()">✕</button>
+
+        <div class="logo-circle">🔐</div>
+
+        <h1>Подтверждение входа</h1>
+
+        <div class="code-instructions">
+
+            <p>1. Зайди в Telegram и запусти бота</p>
+            <p>2. Нажми «Отправить код»</p>
+            <p>3. Введи код из бота</p>
+
+        </div>
+
+        <button id="sendCodeBtn" class="main-btn" onclick="sendLoginCode()">
+            Отправить код
+        </button>
+
+        <input id="codeInput" type="text" maxlength="6" placeholder="000000">
+
+    </div>
+
+</section>
+
+<!-- SOCKET -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
